@@ -18,8 +18,8 @@ public partial class MacroSettingsPageViewModel : ViewModel
     private readonly INavigationService _navigationService;
 
     [ObservableProperty]
-    private string[] _quickFightMacroHotkeyMode = [OneKeyFightTask.HoldOnMode, OneKeyFightTask.HoldFinishMode, OneKeyFightTask.TickMode];
-
+    private string[] _quickFightMacroHotkeyMode = [OneKeyFightTask.HoldOnMode, OneKeyFightTask.TickMode];
+    
     public MacroSettingsPageViewModel(IConfigService configService, INavigationService navigationService)
     {
         Config = configService.Get();
