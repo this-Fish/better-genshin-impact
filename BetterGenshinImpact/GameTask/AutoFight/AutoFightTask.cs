@@ -758,7 +758,7 @@ public class AutoFightTask : ISoloTask
                         Logger.LogInformation("使用 枫原万叶-长E 拾取掉落物");
                         if (picker.TrySwitch(10))
                         {
-                            await Delay(100, ct);
+                            await Delay(250, ct);
                             // 等待元素战技 CD 就绪
                             await picker.WaitSkillCd(ct);
                             
@@ -793,7 +793,7 @@ public class AutoFightTask : ISoloTask
                     var find = _taskParam.QinDoublePickUp;
                     if (picker.TrySwitch(10))
                     {
-                        await Delay(100, ct);
+                        await Delay(200, ct);
                         foreach (var miningActionStr in actionsToUse)
                         {
                             var pickUpAction = CombatScriptParser.ParseContext(miningActionStr);
