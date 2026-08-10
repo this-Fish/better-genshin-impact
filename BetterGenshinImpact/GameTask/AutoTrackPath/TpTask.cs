@@ -891,6 +891,7 @@ public class TpTask
 
     private async Task ClickTpPointAfterMapPointSelected(TeleportTargetContext target)
     {
+        await Delay(GetTeleportOperationDelay(300), ct); // 嘗試使傳送變得穏定(多加300等待傳送選項出現)
         for (var pointAttempt = 0; pointAttempt < 3; pointAttempt++)
         {
             if (pointAttempt > 0)
