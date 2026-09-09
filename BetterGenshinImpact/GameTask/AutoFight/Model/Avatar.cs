@@ -333,6 +333,7 @@ public class Avatar
             }
 
             SimulateSwitchAction(Index);
+            shouldResendSwitchAction = false;
 
             Sleep(250, Ct);
         }
