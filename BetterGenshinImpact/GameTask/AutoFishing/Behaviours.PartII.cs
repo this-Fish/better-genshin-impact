@@ -318,6 +318,11 @@ namespace BetterGenshinImpact.GameTask.AutoFishing
         [BlackboardKey(Access = Access.Read)]
         public BehaviourKeyAccess<int> HandoffTimeSeconds { get; private set; } = null!;
 
+        // 连续未检测到退出按钮的计数
+        private int _noExitButtonCount = 0;
+        // 是否已尝试按ESC
+        private bool _escAttempted = false;
+
         private QuitFishingMode(string name, ILogger logger, IInputSimulator input, CultureInfo? cultureInfo = null, IStringLocalizer? stringLocalizer = null) : base(name)
         {
             _logger = logger;
@@ -339,32 +344,70 @@ namespace BetterGenshinImpact.GameTask.AutoFishing
                 return Status.Running;
             }
 
-            // 新增：如果未检测到退出钓鱼按钮，说明不在钓鱼模式，直接成功退出
-            if (imageRegion.Find(RecognitionAssets.Get("AutoFishing", "ExitFishingButton", imageRegion)).IsEmpty())
-            {
-                _logger.LogInformation("未检测到退出钓鱼按钮，可能不在钓鱼模式，直接退出");
-                return Status.Success;
-            }
-
-            if (Bv.FindF(imageRegion, _fishingLocalizedString))
-            {
-                _logger.LogInformation("退出完成");
-                return Status.Success;
-            }
-
             Action<int> sleep = Sleep.Get();
-            if (Bv.ClickBlackConfirmButton(imageRegion))
+
+            // 1. 检测是否存在退出钓鱼按钮
+            bool hasExitButton = !imageRegion.Find(RecognitionAssets.Get("AutoFishing", "ExitFishingButton", imageRegion)).IsEmpty();
+
+            if (hasExitButton)
             {
-                _logger.LogInformation("在“是否退出钓鱼？”界面点击确认");
-                sleep(1000);
+                // 检测到退出按钮 -> 重置计数器，重置ESC尝试标记
+                _noExitButtonCount = 0;
+                _escAttempted = false;
+
+                if (Bv.FindF(imageRegion, _fishingLocalizedString))
+                {
+                    _logger.LogInformation("退出完成");
+                    return Status.Success;
+                }
+
+                // 尝试点击确认框（“是否退出钓鱼？”）
+                if (Bv.ClickBlackConfirmButton(imageRegion))
+                {
+                    _logger.LogInformation("在“是否退出钓鱼？”界面点击确认");
+                    sleep(1000);
+                    return Status.Running;
+                }
+
+                // 否则按ESC关闭钓鱼界面
+                _input.Keyboard.KeyPress(VK.VK_ESCAPE);
+                sleep(2000);
+                return Status.Running;
             }
             else
             {
-                _input.Keyboard.KeyPress(VK.VK_ESCAPE);
-                sleep(2000);
-            }
+                // 未检测到退出按钮 -> 可能已退出，或界面被确认框/其他遮挡
+                // 优先处理确认框（如果存在）
+                if (Bv.ClickBlackConfirmButton(imageRegion))
+                {
+                    _logger.LogInformation("在“是否退出钓鱼？”界面点击确认");
+                    sleep(1000);
+                    return Status.Running;
+                }
 
-            return Status.Running;
+                // 既无退出按钮，也无确认框，可能是已退出
+                _noExitButtonCount++;
+                if (_noExitButtonCount >= 3)   // 连续3次检测不到，认为已退出
+                {
+                    _logger.LogInformation("[私人版] 连续多次未检测到退出按钮，认为已退出");
+                    return Status.Success;
+                }
+
+                // 尚未达到阈值，尝试按一次ESC（模拟手动退出），仅尝试一次
+                if (!_escAttempted)
+                {
+                    _input.Keyboard.KeyPress(VK.VK_ESCAPE);
+                    sleep(2000);
+                    _escAttempted = true;
+                    return Status.Running;
+                }
+                else
+                {
+                    // 已尝试过ESC，等待下次检测
+                    sleep(500);
+                    return Status.Running;
+                }
+            }
         }
     }
 
