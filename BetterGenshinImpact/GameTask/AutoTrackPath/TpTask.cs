@@ -1248,21 +1248,12 @@ public class TpTask
             catch (TeleportPanelNotOpenedException e)
             {
                 // 同一视野内点击后未出现面板，重试只会重复点击同一位置。
+                
                 // 先关闭未激活点详情面板
                 Simulation.SendInput.Keyboard.KeyPress(User32.VK.VK_ESCAPE);
                 await Delay(300, ct);
             
-                // 恢复地图图层状态
-                try
-                {
-                    await SwitchToGroundMapLayerIfNeeded();
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogDebug("尝试切回地面图层失败: {Message}", ex.Message);
-                }
-            
-                Logger.LogWarning("[私人版] 点击未激活传送点，已关闭面板并清理状态: {Message}", e.Message);
+                Logger.LogWarning("[私人版] 点击到未激活传送点，已关闭面板并清理状态");
                 throw;
             }
             catch (TpPointNotActivate e)
