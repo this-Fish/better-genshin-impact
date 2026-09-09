@@ -390,6 +390,9 @@ namespace BetterGenshinImpact.GameTask.AutoFishing
                 if (_noExitButtonCount >= 3)   // 连续3次检测不到，认为已退出
                 {
                     _logger.LogInformation("[私人版] 连续多次未检测到退出按钮，认为已退出");
+                    // 再補一次ESC返回主介面
+                     _input.Keyboard.KeyPress(VK.VK_ESCAPE);
+                    sleep(2000);
                     return Status.Success;
                 }
 
