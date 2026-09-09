@@ -722,6 +722,9 @@ public class AutoFightTask : ISoloTask
                             await Delay(100, ct);
                             // 等待元素战技 CD 就绪
                             await picker.WaitSkillCd(ct);
+                            await Delay(50, ct);
+                            // 执行一次普通左键平 A
+                            await SimulateMouseLeftClickLoopAsync(1, ct);
                             
                             // 调用统一的辅助方法，模拟万叶长按 E 的输入序列：
                             // 包含释放鼠标左键前摇防卡键 -> E 键 KeyDown -> 延时 800ms -> E 键 KeyUp -> 延时 50ms
@@ -762,6 +765,7 @@ public class AutoFightTask : ISoloTask
                             for (int i = 0; i < 2; i++)
                             {
                                 await picker.WaitSkillCd(ct);
+                                await Delay(50, ct);
                                 foreach (var command in pickUpAction.CombatCommands)
                                 {
                                     command.Execute(combatScenes);
