@@ -1,4 +1,5 @@
-using BetterGenshinImpact.GameTask.AutoFight.Model;
+﻿using BetterGenshinImpact.GameTask.AutoFight.Model;
+using BetterGenshinImpact.GameTask.AutoFight.Script;
 using CsTrees;
 using CsTrees.Blackboard;
 using System;
@@ -40,12 +41,6 @@ public partial class BasicActionsByDuration : Composite
         FeedbackMessage = $"站场{seconds}秒";
     }
 
-    protected override void Initialize()
-    {
-        _index = 0;
-        _startTicks = Stopwatch.GetTimestamp();
-    }
-
     public override async IAsyncEnumerable<Behaviour> Tick()
     {
         // 是否为上个 Tick 未完成的子动作续跑（当前叶子均阻塞式完成，此路径为叶子非阻塞化预留）
@@ -57,6 +52,8 @@ public partial class BasicActionsByDuration : Composite
                 if (child.Status != Status.Invalid)
                     child.Stop(Status.Invalid);
             }
+            _index = 0;
+            _startTicks = Stopwatch.GetTimestamp();
             Initialize();
         }
         else if (CurrentChild is { Status: Status.Running })
@@ -82,8 +79,8 @@ public partial class BasicActionsByDuration : Composite
                 yield break;
             }
 
-            // E穿插：每个子动作边界检查一次，非冷却则切人释放（UseSkill 内部自动记录冷却）
-            if (_useE && avatar.GetSkillCdState() == SkillCdState.Ready)
+            // E穿插：每个子动作边界检查一次，就绪则切人释放（UseSkill 内部自动记录冷却）
+            if (_useE && ESkillCdTracker.IsReady(avatar.Name))
             {
                 avatar.Switch();
                 avatar.UseSkill(hold: false);
@@ -179,12 +176,6 @@ public partial class BasicActionsByCount : Composite
         FeedbackMessage = $"站场{times}轮";
     }
 
-    protected override void Initialize()
-    {
-        _index = 0;
-        _completedLoops = 0;
-    }
-
     public override async IAsyncEnumerable<Behaviour> Tick()
     {
         // 是否为上个 Tick 未完成的子动作续跑（当前叶子均阻塞式完成，此路径为叶子非阻塞化预留）
@@ -196,6 +187,7 @@ public partial class BasicActionsByCount : Composite
                 if (child.Status != Status.Invalid)
                     child.Stop(Status.Invalid);
             }
+            _index = 0;
             Initialize();
         }
         else if (CurrentChild is { Status: Status.Running })
@@ -213,8 +205,8 @@ public partial class BasicActionsByCount : Composite
                 yield break;
             }
 
-            // E穿插：每个子动作边界检查一次，非冷却则切人释放（UseSkill 内部自动记录冷却）
-            if (_useE && avatar.GetSkillCdState() == SkillCdState.Ready)
+            // E穿插：每个子动作边界检查一次，就绪则切人释放（UseSkill 内部自动记录冷却）
+            if (_useE && ESkillCdTracker.IsReady(avatar.Name))
             {
                 avatar.Switch();
                 avatar.UseSkill(hold: false);
