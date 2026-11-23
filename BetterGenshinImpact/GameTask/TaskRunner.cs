@@ -165,7 +165,7 @@ public class TaskRunner
         SystemControl.ActivateWindow();
 
         // 加上等待防止地圖追蹤開發工具點擊
-        Task.Delay(20);
+        Task.Delay(100);
 
         // 游戏获焦后再释放，避免鼠标抬起事件落到 BGI 界面。
         // [输入状态安全] 任务启动前释放所有残留按键。
