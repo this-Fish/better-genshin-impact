@@ -164,6 +164,9 @@ public class TaskRunner
         // 激活原神窗口；遮罩的显示由下一帧上报给 IMaskWindowHost 后自动恢复
         SystemControl.ActivateWindow();
 
+        // 加上等待防止地圖追蹤開發工具點擊
+        await Task.Delay(20);
+
         // 游戏获焦后再释放，避免鼠标抬起事件落到 BGI 界面。
         // [输入状态安全] 任务启动前释放所有残留按键。
         // 助手触发命令时，游戏角色可能正在赶路/鼓舞（W/Shift/空格等长按），按键可能残留按下状态。
