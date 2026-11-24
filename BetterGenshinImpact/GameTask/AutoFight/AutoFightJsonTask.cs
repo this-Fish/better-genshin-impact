@@ -727,10 +727,14 @@ public class AutoFightJsonTask : ISoloTask
                     if (forcePickup || !shouldSkip)
                     {
                         Logger.LogInformation("使用 枫原万叶-长E 拾取掉落物");
+                        // 执行一次普通左键平 A
+                        await SimulateMouseLeftClickLoopAsync(1, _ct);
                         if (picker.TrySwitch(10))
                         {
                             await Delay(100, _ct);
                             await picker.WaitSkillCd(_ct);
+                            await Delay(50, _ct);
+
                             await SimulateHoldElementalSkillAsync(800, _ct);
                             await SimulateMouseLeftClickLoopAsync(6, _ct);
                             await Delay(1500, _ct);
@@ -762,6 +766,7 @@ public class AutoFightJsonTask : ISoloTask
                             for (int i = 0; i < 2; i++)
                             {
                                 await picker.WaitSkillCd(_ct);
+                                await Delay(50, _ct);
                                 foreach (var command in pickUpAction.CombatCommands)
                                 {
                                     command.Execute(combatScenes);
