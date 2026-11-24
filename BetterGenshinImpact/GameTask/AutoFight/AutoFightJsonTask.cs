@@ -733,6 +733,8 @@ public class AutoFightJsonTask : ISoloTask
                         {
                             await Delay(100, _ct);
                             await picker.WaitSkillCd(_ct);
+                            // 执行一次普通左键平 A
+                            await SimulateMouseLeftClickLoopAsync(1, _ct);
                             await Delay(50, _ct);
 
                             await SimulateHoldElementalSkillAsync(800, _ct);
